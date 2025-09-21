@@ -1,0 +1,7 @@
+Generative AI for Youth Mental Wellness 🌱🤖
+
+This project focuses on leveraging Generative AI to address the growing challenges of youth mental health by providing personalized, stigma-free, and accessible support. Mental health issues such as stress, anxiety, and depression are rapidly increasing among young people, yet many avoid seeking help due to stigma, lack of awareness, or limited access to professionals. Our solution bridges this gap by offering AI-powered empathetic chat support, coping strategies, mindfulness prompts, mood tracking, and journaling features, all within a confidential and judgment-free platform.
+
+Unlike traditional apps, this solution is proactive and adaptive, detecting early signs of emotional distress and recommending professional resources or peer support when necessary. The system ensures 24/7 accessibility, making it a reliable companion for youth navigating academic pressures, social challenges, and personal struggles.
+
+The Unique Selling Proposition (USP) lies in its ability to combine Generative AI with personalized wellness interventions, creating an engaging and continuous support system that empowers young people to take control of their mental well-being. By fostering resilience, emotional awareness, and healthy coping mechanisms, the solution not only benefits individuals but also contributes to building a stronger, healthier future generation.
