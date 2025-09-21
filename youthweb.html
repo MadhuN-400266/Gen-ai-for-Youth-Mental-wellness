@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSpace - Youth Mental Wellness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .mood-emoji {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .mood-emoji:hover {
+            transform: scale(1.2);
+        }
+        
+        .mood-emoji.selected {
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+        }
+        
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .breathing-circle {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white p-6 shadow-lg">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-2">🌟 MindSpace</h1>
+            <p class="text-blue-100">Your safe space for mental wellness</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="flex space-x-8">
+                <button onclick="showSection('chat')" class="nav-btn py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium">
+                    💬 Chat Support
+                </button>
+                <button onclick="showSection('mood')" class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                    📊 Mood Tracker
+                </button>
+                <button onclick="showSection('exercises')" class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                    🧘 Wellness Activities
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-6">
+        <!-- Chat Section -->
+        <section id="chat-section" class="section">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Chat with MindBot 🤖</h2>
+                <p class="text-gray-600 mb-6">I'm here to listen and provide support. Feel free to share what's on your mind.</p>
+                
+                <div id="chat-messages" class="bg-gray-50 rounded-lg p-4 h-80 overflow-y-auto mb-4 space-y-3">
+                    <div class="chat-message bg-blue-100 rounded-lg p-3 max-w-xs">
+                        <p class="text-sm text-blue-800">Hi there! I'm MindBot. How are you feeling today? 😊</p>
+                    </div>
+                </div>
+                
+                <form onsubmit="sendMessage(event)" class="flex gap-3">
+                    <input type="text" id="chat-input" placeholder="Type your message here..." 
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Mood Tracking Section -->
+        <section id="mood-section" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Daily Mood Check-in 📈</h2>
+                <p class="text-gray-600 mb-6">Track how you're feeling to better understand your emotional patterns.</p>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-4">How are you feeling right now?</h3>
+                    <div class="flex justify-center space-x-6 mb-6">
+                        <div class="mood-emoji text-4xl" onclick="selectMood('😢', 'Very Sad', 1)" data-mood="1">😢</div>
+                        <div class="mood-emoji text-4xl" onclick="selectMood('😔', 'Sad', 2)" data-mood="2">😔</div>
+                        <div class="mood-emoji text-4xl" onclick="selectMood('😐', 'Neutral', 3)" data-mood="3">😐</div>
+                        <div class="mood-emoji text-4xl" onclick="selectMood('😊', 'Happy', 4)" data-mood="4">😊</div>
+                        <div class="mood-emoji text-4xl" onclick="selectMood('😄', 'Very Happy', 5)" data-mood="5">😄</div>
+                    </div>
+                    
+                    <div id="mood-feedback" class="text-center text-gray-600 mb-4"></div>
+                    
+                    <div class="text-center">
+                        <button onclick="logMood()" id="log-mood-btn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50" disabled>
+                            Log My Mood
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-medium mb-4">Your Mood This Week</h3>
+                    <div id="mood-chart" class="bg-gray-50 rounded-lg p-4 h-40 flex items-end justify-center space-x-2">
+                        <div class="text-gray-500">Start logging your mood to see patterns!</div>
+                    </div>
+                    <div id="mood-stats" class="mt-4 text-sm text-gray-600 text-center"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wellness Exercises Section -->
+        <section id="exercises-section" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Wellness Activities 🧘</h2>
+                <p class="text-gray-600 mb-6">Try these mindfulness exercises to help manage stress and improve your wellbeing.</p>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Breathing Exercise -->
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3 text-blue-800">🫁 Breathing Exercise</h3>
+                        <p class="text-blue-700 mb-4">Follow the circle to practice deep breathing and reduce anxiety.</p>
+                        
+                        <div class="text-center mb-4">
+                            <div id="breathing-circle" class="breathing-circle w-20 h-20 bg-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center text-white font-semibold">
+                                Breathe
+                            </div>
+                            <div id="breathing-instruction" class="text-blue-800 font-medium">Click Start to begin</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button onclick="startBreathing()" id="breathing-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Start
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Gratitude Journal -->
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3 text-green-800">📝 Gratitude Journal</h3>
+                        <p class="text-green-700 mb-4">Write down three things you're grateful for today.</p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <input type="text" placeholder="I'm grateful for..." class="gratitude-input w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            <input type="text" placeholder="I'm grateful for..." class="gratitude-input w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                            <input type="text" placeholder="I'm grateful for..." class="gratitude-input w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        </div>
+                        
+                        <div class="text-center">
+                            <button onclick="saveGratitude()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                Save Entry
+                            </button>
+                        </div>
+                        
+                        <div id="gratitude-feedback" class="mt-3 text-center text-green-700 font-medium hidden"></div>
+                    </div>
+                    
+                    <!-- Quick Meditation -->
+                    <div class="bg-purple-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3 text-purple-800">🧘 Quick Meditation</h3>
+                        <p class="text-purple-700 mb-4">A 2-minute guided meditation to help you center yourself.</p>
+                        
+                        <div class="text-center mb-4">
+                            <div id="meditation-timer" class="text-3xl font-bold text-purple-800 mb-2">2:00</div>
+                            <div id="meditation-instruction" class="text-purple-700">Find a comfortable position and click start</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button onclick="startMeditation()" id="meditation-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                Start Meditation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Global variables
+        let currentMood = null;
+        let moodData = JSON.parse(localStorage.getItem('moodData')) || [];
+        let breathingActive = false;
+        let meditationActive = false;
+        let meditationTimer = null;
+        let meditationTime = 120; // 2 minutes in seconds
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-blue-500', 'text-blue-600');
+            
+            // Load mood chart if switching to mood section
+            if (sectionName === 'mood') {
+                displayMoodChart();
+            }
+        }
+
+        // Chat functionality
+        function sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Generate bot response
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                addChatMessage(response, 'bot');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            if (sender === 'user') {
+                messageDiv.className += ' bg-blue-600 text-white rounded-lg p-3 max-w-xs ml-auto';
+            } else {
+                messageDiv.className += ' bg-blue-100 rounded-lg p-3 max-w-xs';
+            }
+            
+            messageDiv.innerHTML = `<p class="text-sm ${sender === 'user' ? 'text-white' : 'text-blue-800'}">${message}</p>`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function generateBotResponse(userMessage) {
+            const responses = [
+                "I hear you. It's completely normal to feel this way sometimes. What's been on your mind lately?",
+                "Thank you for sharing that with me. Your feelings are valid. Would you like to talk about what might be causing these feelings?",
+                "It sounds like you're going through a tough time. Remember, it's okay to not be okay. What usually helps you feel better?",
+                "I'm glad you felt comfortable sharing that. Taking care of your mental health is really important. Have you tried any relaxation techniques?",
+                "That's a lot to process. You're being really brave by talking about it. What kind of support do you think would help you most right now?",
+                "I understand this might be difficult. Remember that seeking help is a sign of strength, not weakness. How are you taking care of yourself today?",
+                "Your feelings matter, and I'm here to listen. Sometimes just talking about things can help. What's one small thing that made you smile recently?",
+                "Thank you for trusting me with this. It's important to acknowledge how you're feeling. Would you like to try one of our wellness exercises?"
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // Mood tracking functionality
+        function selectMood(emoji, label, value) {
+            currentMood = { emoji, label, value };
+            
+            // Update visual selection
+            document.querySelectorAll('.mood-emoji').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelector(`[data-mood="${value}"]`).classList.add('selected');
+            
+            // Update feedback
+            document.getElementById('mood-feedback').textContent = `You selected: ${emoji} ${label}`;
+            document.getElementById('log-mood-btn').disabled = false;
+        }
+
+        function logMood() {
+            if (!currentMood) return;
+            
+            const today = new Date().toDateString();
+            const existingEntry = moodData.find(entry => entry.date === today);
+            
+            if (existingEntry) {
+                existingEntry.mood = currentMood;
+            } else {
+                moodData.push({
+                    date: today,
+                    mood: currentMood,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            localStorage.setItem('moodData', JSON.stringify(moodData));
+            
+            // Show success message
+            document.getElementById('mood-feedback').textContent = `✅ Mood logged successfully! Thanks for checking in.`;
+            document.getElementById('log-mood-btn').disabled = true;
+            
+            // Update chart
+            displayMoodChart();
+            
+            // Reset selection after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.mood-emoji').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                currentMood = null;
+                document.getElementById('mood-feedback').textContent = '';
+                document.getElementById('log-mood-btn').disabled = true;
+            }, 3000);
+        }
+
+        function displayMoodChart() {
+            const chartContainer = document.getElementById('mood-chart');
+            const statsContainer = document.getElementById('mood-stats');
+            
+            if (moodData.length === 0) {
+                chartContainer.innerHTML = '<div class="text-gray-500">Start logging your mood to see patterns!</div>';
+                statsContainer.textContent = '';
+                return;
+            }
+            
+            // Get last 7 days of data
+            const last7Days = moodData.slice(-7);
+            
+            // Create simple bar chart
+            chartContainer.innerHTML = '';
+            chartContainer.className = 'bg-gray-50 rounded-lg p-4 h-40 flex items-end justify-center space-x-2';
+            
+            last7Days.forEach((entry, index) => {
+                const bar = document.createElement('div');
+                const height = (entry.mood.value / 5) * 100;
+                bar.className = 'bg-blue-500 rounded-t flex flex-col items-center justify-end';
+                bar.style.height = height + '%';
+                bar.style.width = '30px';
+                bar.innerHTML = `
+                    <div class="text-xs mb-1">${entry.mood.emoji}</div>
+                    <div class="text-xs text-gray-600 transform rotate-45 origin-bottom-left">${new Date(entry.date).toLocaleDateString('en-US', {weekday: 'short'})}</div>
+                `;
+                chartContainer.appendChild(bar);
+            });
+            
+            // Calculate average mood
+            const avgMood = (last7Days.reduce((sum, entry) => sum + entry.mood.value, 0) / last7Days.length).toFixed(1);
+            statsContainer.textContent = `Average mood this week: ${avgMood}/5 ⭐`;
+        }
+
+        // Breathing exercise
+        function startBreathing() {
+            const btn = document.getElementById('breathing-btn');
+            const instruction = document.getElementById('breathing-instruction');
+            const circle = document.getElementById('breathing-circle');
+            
+            if (!breathingActive) {
+                breathingActive = true;
+                btn.textContent = 'Stop';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                
+                let phase = 'inhale';
+                let count = 4;
+                
+                const breathingCycle = setInterval(() => {
+                    if (!breathingActive) {
+                        clearInterval(breathingCycle);
+                        return;
+                    }
+                    
+                    if (phase === 'inhale') {
+                        instruction.textContent = `Breathe in... ${count}`;
+                        circle.style.transform = 'scale(1.3)';
+                        circle.style.backgroundColor = '#60a5fa';
+                    } else if (phase === 'hold') {
+                        instruction.textContent = `Hold... ${count}`;
+                        circle.style.backgroundColor = '#34d399';
+                    } else {
+                        instruction.textContent = `Breathe out... ${count}`;
+                        circle.style.transform = 'scale(1)';
+                        circle.style.backgroundColor = '#a78bfa';
+                    }
+                    
+                    count--;
+                    
+                    if (count === 0) {
+                        if (phase === 'inhale') {
+                            phase = 'hold';
+                            count = 2;
+                        } else if (phase === 'hold') {
+                            phase = 'exhale';
+                            count = 4;
+                        } else {
+                            phase = 'inhale';
+                            count = 4;
+                        }
+                    }
+                }, 1000);
+                
+                window.breathingInterval = breathingCycle;
+            } else {
+                stopBreathing();
+            }
+        }
+
+        function stopBreathing() {
+            breathingActive = false;
+            clearInterval(window.breathingInterval);
+            
+            const btn = document.getElementById('breathing-btn');
+            const instruction = document.getElementById('breathing-instruction');
+            const circle = document.getElementById('breathing-circle');
+            
+            btn.textContent = 'Start';
+            btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            instruction.textContent = 'Click Start to begin';
+            circle.style.transform = 'scale(1)';
+            circle.style.backgroundColor = '#60a5fa';
+        }
+
+        // Gratitude journal
+        function saveGratitude() {
+            const inputs = document.querySelectorAll('.gratitude-input');
+            const entries = Array.from(inputs).map(input => input.value.trim()).filter(value => value);
+            
+            if (entries.length === 0) {
+                document.getElementById('gratitude-feedback').textContent = 'Please write at least one thing you\'re grateful for!';
+                document.getElementById('gratitude-feedback').classList.remove('hidden');
+                return;
+            }
+            
+            // Save to localStorage
+            const gratitudeData = JSON.parse(localStorage.getItem('gratitudeData')) || [];
+            gratitudeData.push({
+                date: new Date().toDateString(),
+                entries: entries,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('gratitudeData', JSON.stringify(gratitudeData));
+            
+            // Show success message
+            document.getElementById('gratitude-feedback').textContent = `✨ Saved ${entries.length} gratitude entries! Practicing gratitude can boost your mood.`;
+            document.getElementById('gratitude-feedback').classList.remove('hidden');
+            
+            // Clear inputs
+            inputs.forEach(input => input.value = '');
+            
+            // Hide feedback after 5 seconds
+            setTimeout(() => {
+                document.getElementById('gratitude-feedback').classList.add('hidden');
+            }, 5000);
+        }
+
+        // Meditation
+        function startMeditation() {
+            const btn = document.getElementById('meditation-btn');
+            const timer = document.getElementById('meditation-timer');
+            const instruction = document.getElementById('meditation-instruction');
+            
+            if (!meditationActive) {
+                meditationActive = true;
+                meditationTime = 120;
+                btn.textContent = 'Stop';
+                btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                
+                const instructions = [
+                    "Close your eyes and take a deep breath...",
+                    "Focus on your breathing, in and out...",
+                    "Notice any thoughts, then gently return to your breath...",
+                    "Feel your body relaxing with each breath...",
+                    "You're doing great, keep focusing on your breath...",
+                    "Almost done, take a few more deep breaths..."
+                ];
+                
+                let instructionIndex = 0;
+                instruction.textContent = instructions[0];
+                
+                meditationTimer = setInterval(() => {
+                    if (!meditationActive) {
+                        clearInterval(meditationTimer);
+                        return;
+                    }
+                    
+                    meditationTime--;
+                    const minutes = Math.floor(meditationTime / 60);
+                    const seconds = meditationTime % 60;
+                    timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Change instruction every 20 seconds
+                    if (meditationTime % 20 === 0 && instructionIndex < instructions.length - 1) {
+                        instructionIndex++;
+                        instruction.textContent = instructions[instructionIndex];
+                    }
+                    
+                    if (meditationTime === 0) {
+                        stopMeditation();
+                        instruction.textContent = "🎉 Great job! You completed your meditation session.";
+                    }
+                }, 1000);
+            } else {
+                stopMeditation();
+            }
+        }
+
+        function stopMeditation() {
+            meditationActive = false;
+            clearInterval(meditationTimer);
+            
+            const btn = document.getElementById('meditation-btn');
+            const timer = document.getElementById('meditation-timer');
+            const instruction = document.getElementById('meditation-instruction');
+            
+            btn.textContent = 'Start Meditation';
+            btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            timer.textContent = '2:00';
+            
+            if (meditationTime > 0) {
+                instruction.textContent = 'Find a comfortable position and click start';
+            }
+            
+            meditationTime = 120;
+        }
+
+        // Initialize mood chart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            displayMoodChart();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982b59fda1713a22',t:'MTc1ODQ3NjQ2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
